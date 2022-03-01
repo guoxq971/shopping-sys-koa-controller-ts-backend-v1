@@ -1,0 +1,32 @@
+/* tsconfig.json 配置 */
+
+{
+  /*compileOnSave如果设为true,在我们编辑了项目文件保存的时候，
+  编辑器会根据tsconfig.json的配置更新重新生成文本，不过这个编辑器支持*/
+  "compileOnSave": true,
+  /*compilerOptions编译选项*/
+  "compilerOptions": {
+    /*module用来指定要使用的模板标准*/
+    "module": "commonjs",
+    /*target用于指定编译之后的版本目录*/
+    "target": "es2017",
+    /*moduleResolution用于选择模块解析策略，有"node"和"classic"两种类型*/
+    "moduleResolution": "node",
+    /*outDir用来指定输出文件夹，值为一个文件夹路径字符串，输出的文件都将放置在这个文件夹*/
+    "outDir": "./dist",
+    /*当this表达式的值为any类型的时候，生成一个错误*/
+    "noImplicitThis": true,
+    /*strictNullChecks当设为true时，null和undefined值不能赋值给非这两种类型的值，
+    别的类型的值也不能赋给他们，除了any类型，还有个例外就是undefined可以赋值给void类型*/
+    "strictNullChecks": true,
+    /*experimentalDecorators用于指定是否启用实验性的装饰器特性*/
+    "experimentalDecorators": true,
+    /*emitDecoratorMetadata用于指定是否为装上去提供元数据支持，关于元数据，也是ES6的新标准，
+    可以通过Reflect提供的静态方法获取元数据，如果需要使用Reflect的一些方法，需要引用ES2015.Reflect这个库*/
+    "emitDecoratorMetadata": true
+  },
+  /*include也可以指定要编译的路径列表*/
+  "include": [
+    "./src/**/*"
+  ]
+}
