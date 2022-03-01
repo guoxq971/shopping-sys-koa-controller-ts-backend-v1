@@ -1,5 +1,5 @@
 import { dbQuery } from "../config/db2";
-import { userListDto, userListVo } from "../interFaces/User";
+import { shopListDto, shopListVo } from "../interFaces/Shop";
 import ErrorException, {
   MSG_del,
   MSG_empty,
@@ -14,46 +14,49 @@ import {
   whereConditionBySttus,
   whereConditionl,
 } from "./BaseService";
-/* list 查询的字段 */
+/* 查询的字段 */
 const selectField = tool.humpToUnderlineByStr(
-  `id, name, password, capital, remark, isDel, status, createTime, updateTime`
+  `id, picFirst, name, capital, description, status, createTime, updateTime, isDel`
 );
-/* add 添加的字段 */
+/* 添加的字段 */
 const insertFields = tool.humpToUnderlineByStr(
-  `name, password, capital, remark, status`
+  `picFirst, name, capital, description, status`
 );
+/* getById */
+const findField = tool.humpToUnderlineByStr(
+  `picFirst, name, capital, description, status, createTime, updateTime`
+);
+const curType = "shop service";
+const logfn = (type, err) => tool.logfn(type, err, curType);
 
-const curType = 'user service'
-const logfn = (type, err)=>tool.logfn(type, err, curType)
-
-export const UserService = {
+export const ShopService = {
   /* 列表 */
-  async list(listDto: userListDto) {
+  async list(listDto: shopListDto) {
     try {
       let where = whereConditionl;
-      if (listDto.name) where += `and name LIKE '%${listDto.name}%'`;
-      if (listDto.capital) where += `and capital LIKE '%${listDto.capital}%'`;
-      if (listDto.remark) where += `and remark LIKE '%${listDto.remark}%'`;
-      if (listDto.isDel) where += `and is_del = ${listDto.isDel}`;
-      if (listDto.status) where += `and status = ${listDto.status}`;
-
+      if (listDto.name) where += ` and name LIKE '%${listDto.name}%' `;
+      if (listDto.description)
+        where += ` and description LIKE '%${listDto.description}%' `;
+      if (listDto.capital) where += ` and capital LIKE %${listDto.capital}% `;
+      if (listDto.isDel) where += ` and is_del = ${listDto.isDel} `;
+      if (listDto.status) where += ` and status = ${listDto.status} `;
       let listSql = "";
       let totalSql = "";
       let total: any[] = [];
 
       listSql = `
         select ${selectField} 
-        from sys_user 
+        from sys_shop 
         ${where}
         order by create_time desc
         limit ${(listDto.pageNum - 1) * listDto.pageSize},${listDto.pageSize}
         `;
       totalSql = `
         select count(*) as total
-        from sys_user 
+        from sys_shop 
         ${where}
         `;
-      let res: userListVo[] = await dbQuery(listSql);
+      let res: shopListVo[] = await dbQuery(listSql);
       total = await dbQuery(totalSql);
 
       return {
@@ -66,7 +69,7 @@ export const UserService = {
     }
   },
 
-  /* 查询 根据 id */
+  /* 查询 */
   async getById(id: string) {
     try {
       let where = whereConditionl;
@@ -76,12 +79,12 @@ export const UserService = {
       let sql = "";
 
       sql = `
-          select ${selectField} 
-          from sys_user 
+          select ${findField} 
+          from sys_shop 
           ${where}
           `;
 
-      let res: userListVo[] = await dbQuery(sql);
+      let res: shopListVo[] = await dbQuery(sql);
 
       return tool.formDataByArray(res);
     } catch (err) {
@@ -90,39 +93,14 @@ export const UserService = {
     }
   },
 
-  /* 查询 根据 用户名密码*/
-  async login(name: string, password: string) {
-    try {
-      let where = whereConditionl;
-      where += `and name = '${name}'`;
-      where += `and password = '${tool.user_encode(password)}'`;
-      let sql = "";
-
-      sql = `
-          select ${selectField} 
-          from sys_user 
-          ${where}
-          `;
-
-      let res: userListVo[] = await dbQuery(sql);
-
-      return tool.formDataByArray(res);
-    } catch (err) {
-      logfn("login", err);
-      return Promise.reject(new ErrorException(err.sqlMessage));
-    }
-  },
-
   /* 添加 */
-  async add(name, password, capital, remark, status) {
+  async add(picFirst, name, capital, description, status) {
     try {
       let sql = `
-      INSERT INTO sys_user 
+      INSERT INTO sys_shop 
       (${insertFields}, id) 
       VALUES 
-      ('${name}', '${tool.user_encode(
-        password
-      )}', ${capital}, ${remark}, ${status}, '${tool.uuid()}')
+      ('${picFirst}', '${name}', '${capital}', '${description}', ${status}, '${tool.uuid()}')
       `;
       let res = await dbQuery(sql);
       if (!res.affectedRows) {
@@ -136,16 +114,15 @@ export const UserService = {
   },
 
   /* 更新 */
-  async update(id, name, password, capital, remark, status) {
+  async update(id, picFirst, name, capital, description, status) {
     try {
       let sql = `
-      UPDATE sys_user 
+      UPDATE sys_shop 
       SET 
+      pic_first = '${picFirst}',
       name = '${name}',
-      ${password ? `password = '${tool.user_encode(password)}',` : ""}
-      capital = ${capital},
-      remark = '${remark}',
-      remark = '${remark}',
+      capital = '${capital}',
+      description = '${description}',
       status = ${status}
       WHERE id = '${id}'
       `;
@@ -164,7 +141,7 @@ export const UserService = {
   async update4status(id: string, status: number) {
     try {
       let sql = `
-      UPDATE sys_user 
+      UPDATE sys_shop 
       SET 
       status = ${status}
       WHERE id = '${id}'
@@ -184,7 +161,7 @@ export const UserService = {
   async del(id) {
     try {
       let sql = `
-      UPDATE sys_user 
+      UPDATE sys_shop 
       SET 
       is_del = 1
       WHERE id = '${id}'
@@ -205,9 +182,8 @@ export const UserService = {
     if (!id) {
       return Promise.reject(new ErrorException(MSG_emptyById));
     }
-    let result: userListVo[] = await UserService.getById(id);
+    let result: shopListVo[] = await ShopService.getById(id);
     if (result.length === 0) {
-      logfn("isEmptyById", MSG_empty);
       return Promise.reject(new ErrorException(MSG_empty));
     }
     return result[0];

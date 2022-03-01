@@ -2,6 +2,7 @@ import moment = require("moment");
 import { is } from "./is";
 import md5 = require("md5");
 export const tool = {
+  logfn: logfn,
   user_encode: user_encode,
   is: is,
   isEmpty: isEmpty,
@@ -13,6 +14,11 @@ export const tool = {
   timeFormat,
   dataFormat,
 };
+
+/* 日志打印 */
+function logfn(type, err, curType) {
+  console.log(`${curType} ${type} ==>`, err);
+}
 /* 用户密码加密 32位数*/
 const user_salt = "!!@##@xq666!@#!";
 export function user_encode(pwd) {

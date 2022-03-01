@@ -10,20 +10,21 @@ const idFieds = {
 const validate2 = (body, fields) => {
   let msg = "";
   // console.log("validate2 fields", fields);
-  Object.keys(fields).forEach((key) => {
-    fields[key].rules.forEach((item) => {
+
+  for (let key of Object.keys(fields)) {
+    for (let item of fields[key].rules) {
       if (item === "required") {
         // console.log("body[key]", body[key]);
         if (tool.isEmpty(body[key])) {
-          msg = `${fields[key].label}不能为空`;
+          return `${fields[key].label}不能为空`;
         }
       } else if (item === "number") {
         if (!tool.is.isNumber(body[key])) {
-          msg = `${fields[key].label}必须为number类型`;
+          return `${fields[key].label}必须为number类型`;
         }
       }
-    });
-  });
+    }
+  }
   return msg;
 };
 
